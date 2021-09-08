@@ -46,7 +46,10 @@ def memory_size(inp_image):
     return(out_size)
 
 ######### CHECKING FOR delta_E #############
+#img11 = input_img(uploaded_img1)
 def pix_delta(path1, path2):
+    #image1_rgb = cv2.imread(path1)
+    #image2_rgb = cv2.imread(path2)
     image1_rgb = path1
     image2_rgb = path2
     image1_lab = cv2.cvtColor(image1_rgb.astype(np.float32) / 255, cv2.COLOR_RGB2Lab)
@@ -81,21 +84,37 @@ if img_data1 and img_data2 is not None:
     # Display Uploaded Images Horizontally
     col1, col2 = st.beta_columns(2)
     col1.markdown('**Image 1**')
-    col1.image(img11, use_column_width=True)
+    if(uploaded_img1.mode != 'CMYK'):
+        col1.image(uploaded_img1, use_column_width=True)
+    else:
+        col1.image(img11, use_column_width=True)
     col1.text('Size: ' + str(memory_size(uploaded_img1)) + ' KB,' + '  Dimensions: ' + str(uploaded_img1.size))  
     
     col2.markdown('**Image 2**')
-    col2.image(img22, use_column_width=True)
+    if(uploaded_img2.mode != 'CMYK'):
+        col2.image(uploaded_img2, use_column_width=True)
+    else:
+        col2.image(img22, use_column_width=True)
     col2.text('Size: ' + str(memory_size(uploaded_img2)) + ' KB,' + '  Dimensions: ' + str(uploaded_img2.size)) 
     
 ############################################################################
     
     if(uploaded_img1.size == uploaded_img2.size):
-        pixel_check = pix_delta(img11, img22)
+        if(uploaded_img1.mode != 'P'):
+            pixel_check = pix_delta(img11, img22)
+        ################################################
+        # For Transparent Images or for those with mode 'P'
+        else:
+            img11 = cv2.cvtColor(img11, cv2.COLOR_RGBA2RGB)
+            img22 = cv2.cvtColor(img22, cv2.COLOR_RGBA2RGB)
+            pixel_check = pix_delta(img11, img22)
+            
         if(pixel_check == 'True'):
             st.text('Pixels match exactly')
         else:
             st.text('Pixels do not match exactly')
+            
+        ####################################################
     else:
         st.text('Dimensions are different')
         
